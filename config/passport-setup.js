@@ -1,5 +1,8 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
+
+const { FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET, GOOGLE_CLIENTID, GOOGLE_CLIENT_SECRET } = process.env;
 const UserModel = require('../db/models/UserModel');
 
 passport.serializeUser((user, done) => {
@@ -15,8 +18,8 @@ passport.deserializeUser((id, done) => {
 passport.use(
     new GoogleStrategy({
         //options for google strategy
-        clientID: process.env.GOOGLE_CLIENTID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        clientID: GOOGLE_CLIENTID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
         callbackURL: 'http://localhost:3061/auth/google/redirect'
     }, (accessToken, refreshToken, profile, done) => {
         //passport callback function
@@ -28,9 +31,39 @@ passport.use(
             } else {
                 // if not, create user in our db
                 new UserModel({
-                    googleId: profile.id,
+                    appId: profile.id,
                     username: profile.displayName,
-                    thumbnail: profile._json.picture
+                    thumbnail: profile._json.picture,
+                    provider: profile.provider
+                }).save().then((newUser) => {
+                    console.log('created new user: ', newUser);
+                    done(null, newUser);
+                });
+            }
+        });
+    })
+)
+
+passport.use(
+    new FacebookStrategy({
+        //options for google strategy
+        clientID: FACEBOOK_CLIENT_ID,
+        clientSecret: FACEBOOK_CLIENT_SECRET,
+        callbackURL: 'http://localhost:3061/auth/facebook/redirect'
+    }, (accessToken, refreshToken, profile, done) => {
+        //passport callback function
+        UserModel.findOne({appId: profile.id}).then((currentUser) => {
+            if(currentUser){
+                // already have this user
+                console.log('user is: ', currentUser);
+                done(null, currentUser);
+            } else {
+                // if not, create user in our db
+                new UserModel({
+                    appId: profile.id,
+                    username: profile.displayName,
+                    thumbnail: profile._json.picture,
+                    provider: profile.provider
                 }).save().then((newUser) => {
                     console.log('created new user: ', newUser);
                     done(null, newUser);
