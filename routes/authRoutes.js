@@ -11,13 +11,14 @@ router.get('/google', passport.authenticate('google', {
     scope: ['profile']
 }));
 
-// router.get('/:provider', (req, res) => {
-//     //handle with passport
-//     let { provider } = req.params;
-//     res.send(`logging in witn ${provider}`);
-// });
-
 router.get('/google/redirect', passport.authenticate('google'), (req, res) => {
+    res.redirect('/profile/');
+});
+
+// auth with facebook
+router.get('/facebook', passport.authenticate('facebook'));
+
+router.get('/facebook/redirect', passport.authenticate('facebook'), (req, res) => {
     res.redirect('/profile/');
 });
 
