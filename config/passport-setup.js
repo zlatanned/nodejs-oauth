@@ -23,7 +23,7 @@ passport.use(
         callbackURL: 'http://localhost:3061/auth/google/redirect'
     }, (accessToken, refreshToken, profile, done) => {
         //passport callback function
-        UserModel.findOne({googleId: profile.id}).then((currentUser) => {
+        UserModel.findOne({appId: profile.id}).then((currentUser) => {
             if(currentUser){
                 // already have this user
                 console.log('user is: ', currentUser);
@@ -46,7 +46,7 @@ passport.use(
 
 passport.use(
     new FacebookStrategy({
-        //options for google strategy
+        //options for facebook strategy
         clientID: FACEBOOK_CLIENT_ID,
         clientSecret: FACEBOOK_CLIENT_SECRET,
         callbackURL: 'http://localhost:3061/auth/facebook/redirect'
